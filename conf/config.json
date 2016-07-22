@@ -1,0 +1,8 @@
+{
+    "server":"<SERVER>",
+    "timeout":<TIMEOUT>,
+    "method":"<ENCRYPTION_METHOD>",
+    "fast_open":<FAST_OPEN>,
+    "port_password":{
+    }
+}

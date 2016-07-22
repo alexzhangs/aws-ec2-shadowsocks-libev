@@ -1,0 +1,8 @@
+[librehat-shadowsocks]
+name=Copr repo for shadowsocks owned by librehat
+baseurl=https://copr-be.cloud.fedoraproject.org/results/librehat/shadowsocks/epel-6-$basearch/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/librehat/shadowsocks/pubkey.gpg
+enabled=1
+enabled_metadata=1
