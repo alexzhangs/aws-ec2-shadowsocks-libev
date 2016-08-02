@@ -65,10 +65,10 @@ yum install -y --enablerepo=librehat-shadowsocks shadowsocks-libev || exit $?
 
 # config.json
 cp -a ${0%/*}/conf/config.json /etc/shadowsocks-libev/config.json || exit $?
-sed -i "s/<SERVER>/$SERVER/" /etc/shadowsocks/config.json || exit $?
-sed -i "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" /etc/shadowsocks/config.json || exit $?
-sed -i "s/<TIMEOUT>/$TIMEOUT/" /etc/shadowsocks/config.json || exit $?
-sed -i "s/<FAST_OPEN>/$FAST_OPEN/" /etc/shadowsocks/config.json || exit $?
+sed -i "s/<SERVER>/$SERVER/" /etc/shadowsocks-libev/config.json || exit $?
+sed -i "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" /etc/shadowsocks-libev/config.json || exit $?
+sed -i "s/<TIMEOUT>/$TIMEOUT/" /etc/shadowsocks-libev/config.json || exit $?
+sed -i "s/<FAST_OPEN>/$FAST_OPEN/" /etc/shadowsocks-libev/config.json || exit $?
 
 # shadowsocks-libev-manager
 cp -a ${0%/*}/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager || exit $?
