@@ -72,6 +72,7 @@ sed -i "s/<FAST_OPEN>/$FAST_OPEN/" /etc/shadowsocks-libev/config.json || exit $?
 
 # shadowsocks-libev-manager
 cp -a ${0%/*}/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager || exit $?
+chmod 755 /etc/init.d/shadowsocks-libev-manager || exit $?
 
 # service
 service shadowsocks-libev-manager restart || exit $?
