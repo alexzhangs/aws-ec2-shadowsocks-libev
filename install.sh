@@ -57,10 +57,10 @@ function install_local_repo() {
     return $?
 }
 
-
+# yum repo
 install_remote_repo || install_local_repo || exit $?
 
-yum update -y || exit $?
+# shadowsocks-libev
 yum install -y --enablerepo=librehat-shadowsocks shadowsocks-libev || exit $?
 
 # config.json
