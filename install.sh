@@ -61,7 +61,8 @@ function install_local_repo() {
 install_remote_repo || install_local_repo || exit $?
 
 # shadowsocks-libev
-yum install -y --enablerepo=librehat-shadowsocks shadowsocks-libev || exit $?
+yum-config-manager --enable epel --enable librehat-shadowsocks || exit $?
+yum install -y shadowsocks-libev || exit $?
 
 # config.json
 cp -a ${0%/*}/conf/config.json /etc/shadowsocks-libev/config.json || exit $?
