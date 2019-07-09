@@ -1,24 +1,26 @@
 #!/bin/bash
 
+# Exit on any error
+set -o pipefail -e
+
 usage () {
-    printf "Usage: ${0##*/} [-s SERVER] [-m ENCRYPTION_METHOD] [-t TIMEOUT] [-f true|false]\n"
+    printf "Usage: ${0##*/} [-m ENCRYPTION_METHOD] [-t TIMEOUT] [-f true|false] [-s SERVER] [-p PORT]\n"
     printf "OPTIONS\n"
-    printf "\t[-s SERVER]\n\n"
-    printf "\tServer IP to listen on, default is 0.0.0.0.\n\n"
     printf "\t[-m ENCRYPTION_METHOD]\n\n"
     printf "\tEncryption method, default is aes-256-cfb.\n\n"
     printf "\t[-t TIMEOUT]\n\n"
     printf "\tConnecting timeout after <N> seconds, default is 60.\n\n"
     printf "\t[-f true|false]\n\n"
     printf "\tFast Open, default is false.\n\n"
+    printf "\t[-s SERVER]\n\n"
+    printf "\tIP address that Shadowsocks manager will listen on, default is 127.0.0.1.\n\n"
+    printf "\t[-p PORT]\n\n"
+    printf "\tPort that Shadowsocks manager will listen on, default is 6001.\n\n"
     exit 255
 }
 
-while getopts s:m:t:f:h opt; do
+while getopts m:t:f:s:p::h opt; do
     case $opt in
-        s)
-            SERVER=$OPTARG
-            ;;
         m)
             ENCRYPTION_METHOD=$OPTARG
             ;;
@@ -28,16 +30,25 @@ while getopts s:m:t:f:h opt; do
         f)
             FAST_OPEN=$OPTARG
             ;;
+        s)
+            SERVER=$OPTARG
+            ;;
+        p)
+            PORT=$OPTARG
+            ;;
         *|h)
             usage
             ;;
     esac
 done
 
-[[ -z $SERVER ]] && SERVER="0.0.0.0"
+WORK_DIR=$(cd "$(dirname "$0")"; pwd)
+
 [[ -z $ENCRYPTION_METHOD ]] && ENCRYPTION_METHOD="aes-256-cfb"
 [[ -z $TIMEOUT ]] && TIMEOUT=60
 [[ -z $FAST_OPEN ]] && FAST_OPEN="false"
+[[ -z $SERVER ]] && SERVER="127.0.0.1"
+[[ -z $PORT ]] && PORT=6001
 
 REPO_URLS=(
     'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-6/librehat-shadowsocks-epel-6.repo'
@@ -53,30 +64,33 @@ function install_remote_repo() {
 }
 
 function install_local_repo() {
-    cp -a ${0%/*}/conf/librehat-shadowsocks-epel-6.repo /etc/yum.repos.d/
+    cp -a $WORK_DIR/conf/librehat-shadowsocks-epel-6.repo /etc/yum.repos.d/
     return $?
 }
 
 # yum repo
-install_remote_repo || install_local_repo || exit $?
+install_remote_repo || install_local_repo
 
 # shadowsocks-libev
-yum-config-manager --enable epel --enable librehat-shadowsocks || exit $?
-yum install -y shadowsocks-libev || exit $?
+yum-config-manager --enable epel --enable librehat-shadowsocks
+yum install -y shadowsocks-libev
 
 # config.json
-cp -a ${0%/*}/conf/config.json /etc/shadowsocks-libev/config.json || exit $?
-sed -i "s/<SERVER>/$SERVER/" /etc/shadowsocks-libev/config.json || exit $?
-sed -i "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" /etc/shadowsocks-libev/config.json || exit $?
-sed -i "s/<TIMEOUT>/$TIMEOUT/" /etc/shadowsocks-libev/config.json || exit $?
-sed -i "s/<FAST_OPEN>/$FAST_OPEN/" /etc/shadowsocks-libev/config.json || exit $?
+cp -a $WORK_DIR/conf/config.json /etc/shadowsocks-libev/config.json
+sed -e "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" \
+    -e "s/<TIMEOUT>/$TIMEOUT/" \
+    -e "s/<FAST_OPEN>/$FAST_OPEN/" \
+    -i /etc/shadowsocks-libev/config.json
 
 # shadowsocks-libev-manager
-cp -a ${0%/*}/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager || exit $?
-chmod 755 /etc/init.d/shadowsocks-libev-manager || exit $?
+cp -a $WORK_DIR/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager
+sed -e "s/SSM_SERVER=.*/SSM_SERVER=$SERVER/" \
+    -e "s/SSM_PORT=.*/SSM_PORT=$PORT/" \
+    -i /etc/shadowsocks-libev/config.json
+chmod 755 /etc/init.d/shadowsocks-libev-manager
 
 # service
-service shadowsocks-libev-manager restart || exit $?
-chkconfig shadowsocks-libev-manager on || exit $?
+chkconfig --add shadowsocks-libev-manager
+service shadowsocks-libev-manager restart
 
 exit
