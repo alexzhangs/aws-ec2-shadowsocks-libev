@@ -22,10 +22,14 @@
 #
 [ ${NETWORKING} ="yes" ] || exit 0
 
+# Default
+SSM_SERVER=127.0.0.1
+SSM_PORT=6001
+
 # Daemon
 NAME=shadowsocks-manager
 DAEMON=/usr/bin/ss-manager
-MANAGER_ADDRESS=127.0.0.1:2888
+MANAGER_ADDRESS=$SSM_SERVER:$SSM_PORT
 EXECUTABLE=/usr/bin/ss-server
 
 # Path to the configuration file.
