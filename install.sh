@@ -86,7 +86,7 @@ sed -e "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" \
 cp -a $WORK_DIR/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager
 sed -e "s/SSM_SERVER=.*/SSM_SERVER=$SERVER/" \
     -e "s/SSM_PORT=.*/SSM_PORT=$PORT/" \
-    -i /etc/shadowsocks-libev/config.json
+    -i /etc/init.d/shadowsocks-libev-manager
 chmod 755 /etc/init.d/shadowsocks-libev-manager
 
 # service
