@@ -1,5 +1,5 @@
 {
-    "server":"<SERVER>",
+    "server":"0.0.0.0",
     "timeout":<TIMEOUT>,
     "method":"<ENCRYPTION_METHOD>",
     "fast_open":<FAST_OPEN>,
