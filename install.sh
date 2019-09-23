@@ -60,7 +60,7 @@ function install_remote_repo() {
         curl -v -s -o /etc/yum.repos.d/"$(basename "$url")" "$url"
         ret=$((ret + $?))
     done
-    return ret
+    return $ret
 }
 
 function install_local_repo() {
