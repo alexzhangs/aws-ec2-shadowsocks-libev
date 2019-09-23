@@ -55,25 +55,25 @@ REPO_URLS=(
 )
 
 function install_remote_repo() {
-    local url
+    local url ret=0
     for url in "${REPO_URLS[@]}"; do
-        curl -v -s -o /etc/yum.repos.d/librehat-shadowsocks-epel-6.repo "$url"
-        [[ $? -eq 0 ]] && return
+        curl -v -s -o /etc/yum.repos.d/"$(basename "$url")" "$url"
+        ret=$((ret + $?))
     done
-    return 255
+    return ret
 }
 
 function install_local_repo() {
-    cp -a $WORK_DIR/conf/librehat-shadowsocks-epel-6.repo /etc/yum.repos.d/
-    return $?
+    find $WORK_DIR/conf -n '*.repo' \
+         | xargs -I {} cp -a {} /etc/yum.repos.d/
 }
 
 # yum repo
 install_remote_repo || install_local_repo
 
 # shadowsocks-libev
-yum-config-manager --enable epel --enable librehat-shadowsocks
-yum install -y shadowsocks-libev
+yum install -y shadowsocks-libev \
+    --enablerepo=epel --enablerepo=copr:copr.fedorainfracloud.org:librehat:shadowsocks
 
 # config.json
 cp -a $WORK_DIR/conf/config.json /etc/shadowsocks-libev/config.json
