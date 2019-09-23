@@ -64,7 +64,7 @@ function install_remote_repo() {
 }
 
 function install_local_repo() {
-    find $WORK_DIR/conf -n '*.repo' \
+    find $WORK_DIR/conf -name '*.repo' \
          | xargs -I {} cp -a {} /etc/yum.repos.d/
 }
 
