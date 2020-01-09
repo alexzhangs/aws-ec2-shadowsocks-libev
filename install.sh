@@ -13,7 +13,9 @@ usage () {
     printf "\t[-f true|false]\n\n"
     printf "\tFast Open, default is false.\n\n"
     printf "\t[-s SERVER]\n\n"
-    printf "\tIP address that Shadowsocks manager will listen on, default is 127.0.0.1.\n\n"
+    printf "\tIP address that Shadowsocks manager will listen on, default is 127.0.0.1.\n"
+    printf "\tUse 0.0.0.0 instead of specific IP address to bind on public interface to eliminate\n"
+    printf "\tthe dependency. Bu be aware that the manager API is not protected.\n\n"
     printf "\t[-p PORT]\n\n"
     printf "\tPort that Shadowsocks manager will listen on, default is 6001.\n\n"
     exit 255
