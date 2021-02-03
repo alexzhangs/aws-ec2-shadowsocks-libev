@@ -1,5 +1,15 @@
 #!/bin/bash
 #
+# Script to run Shadowsocks manager in daemon mode at boot time.
+# processname: ss-manager
+# Revision 1.1 - 10th Jul 2019
+# Run "/sbin/chkconfig --add shadowsocks-libev-manager" to add the
+# Run levels.
+#====================================================================
+
+# ORIGINAL code:
+# https://github.com/shadowsocks/shadowsocks-libev/blob/master/rpm/SOURCES/etc/init.d/shadowsocks-libev
+#====================================================================
 # Script to run Shadowsocks in daemon mode at boot time.
 # ScriptAuthor: icyboy
 # Revision 1.0 - 14th Sep 2013
