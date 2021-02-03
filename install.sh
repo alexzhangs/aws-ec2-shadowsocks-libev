@@ -15,9 +15,11 @@ function usage () {
     printf "\t[-s SERVER]\n\n"
     printf "\tIP address that Shadowsocks manager will listen on, default is 127.0.0.1.\n"
     printf "\tUse 0.0.0.0 instead of specific IP address to bind on public interface to eliminate\n"
-    printf "\tthe dependency. Bu be aware that the manager API is not protected.\n\n"
+    printf "\tthe dependency. But be aware that the manager API is not protected.\n\n"
     printf "\t[-p PORT]\n\n"
-    printf "\tPort that Shadowsocks manager will listen on, default is 6001.\n\n"
+    printf "\tPort that Shadowsocks manager will listen on, default is 6001.\n"
+    printf "\tThis port is used by multi-user API, is not for the Socks services.\n"
+    printf "\tDon't confuse it with the Shadowsocks service ports.\n\n"
     exit 255
 }
 
