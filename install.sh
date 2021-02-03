@@ -3,7 +3,7 @@
 # Exit on any error
 set -o pipefail -e
 
-usage () {
+function usage () {
     printf "Usage: ${0##*/} [-m ENCRYPTION_METHOD] [-t TIMEOUT] [-f true|false] [-s SERVER] [-p PORT]\n"
     printf "OPTIONS\n"
     printf "\t[-m ENCRYPTION_METHOD]\n\n"
@@ -56,6 +56,30 @@ REPO_URLS=(
     'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-6/librehat-shadowsocks-epel-6.repo'
 )
 
+function if-yum-repo-exsit () {
+    # Usage: if-yum-repo-exist <repo>; echo $?
+    [[ "$(yum repolist "${1:?}" | awk 'END {print $NF}')" > 0 ]]
+}
+
+function amazon-linux-extra-safe () {
+    repo=${1:?}
+    if type amazon-linux-extras >/dev/null 2>&1; then
+        if ! if-yum-repo-exist "$repo"; then
+            # Amazon Linux 2 AMI needs this
+            echo "installing repo: $repo ..."
+            amazon-linux-extras install -y "$repo"
+        else
+            echo "$repo: not found the repo, abort." >&2
+            exit 255
+        fi
+    else
+        echo 'amazon-linux-extra: not found the command, continue' >&2
+    fi
+}
+
+# epel
+amazon-linux-extra-safe epel
+
 function install_remote_repo() {
     local url ret=0
     for url in "${REPO_URLS[@]}"; do
@@ -70,14 +94,15 @@ function install_local_repo() {
          | xargs -I {} cp -a {} /etc/yum.repos.d/
 }
 
-# yum repo
+echo 'installing yum repo for shadowsocks ...'
 install_remote_repo || install_local_repo
 
-# shadowsocks-libev
+echo 'installing shadowsocks-libev ...'
 yum install -y shadowsocks-libev \
     --enablerepo=epel --enablerepo=copr:copr.fedorainfracloud.org:librehat:shadowsocks
 
 # config.json
+echo 'installing /etc/shadowsocks-libev/config.json ...'
 cp -a $WORK_DIR/conf/config.json /etc/shadowsocks-libev/config.json
 sed -e "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" \
     -e "s/<TIMEOUT>/$TIMEOUT/" \
@@ -85,14 +110,41 @@ sed -e "s/<ENCRYPTION_METHOD>/$ENCRYPTION_METHOD/" \
     -i /etc/shadowsocks-libev/config.json
 
 # shadowsocks-libev-manager
+echo 'installing /etc/init.d/shadowsocks-libev-manager ...'
 cp -a $WORK_DIR/shadowsocks-libev-manager /etc/init.d/shadowsocks-libev-manager
 sed -e "s/SSM_SERVER=.*/SSM_SERVER=$SERVER/" \
     -e "s/SSM_PORT=.*/SSM_PORT=$PORT/" \
     -i /etc/init.d/shadowsocks-libev-manager
 chmod 755 /etc/init.d/shadowsocks-libev-manager
 
-# service
+function symbol-link-try () {
+    # Usage: symbol-link-try TARGET1 [TARGET2 ...] LINK_NAME
+    [[ $# -lt 2 ]] && return 255
+    local link_name=${!#}  # get the last argument
+    if [[ ! -f $link_name ]]; then
+        local target
+        for target in "${@1:$#-1}"; do  # remove the last argument
+            if [[ -f $target ]]; then
+                echo "linking $target to $link_name ..."
+                ln -s "$target" "$link_name"
+                break
+            fi
+        done
+    fi
+}
+
+# patch for Amazon Linux 2 AMI, on 2021-02-03
+# defect: Starting shadowsocks-manager: /usr/bin/ss-manager: error while loading shared libraries: libsodium.so.13: cannot open shared object file: No such file or directory
+symbol-link-try /usr/lib64/libsodium.so.23.3.0 /usr/lib64/libsodium.so /usr/lib64/libsodium.so.13
+
+# patch for Amazon Linux 2 AMI, on 2021-02-03
+# defect: Starting shadowsocks-manager: /usr/bin/ss-manager: error while loading shared libraries: libpcre.so.0: cannot open shared object file: No such file or directory
+symbol-link-try /usr/lib64/libpcre.so.1.2.0 /usr/lib64/libpcre.so /usr/lib64/libpcre.so.0
+
+echo 'updating chkconfig ...'
 chkconfig --add shadowsocks-libev-manager
+
+echo 'restarting service ...'
 service shadowsocks-libev-manager restart
 
 exit
