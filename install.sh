@@ -58,7 +58,7 @@ REPO_URLS=(
     'https://copr.fedorainfracloud.org/coprs/librehat/shadowsocks/repo/epel-6/librehat-shadowsocks-epel-6.repo'
 )
 
-function if-yum-repo-exsit () {
+function if-yum-repo-exist () {
     # Usage: if-yum-repo-exist <repo>; echo $?
     [[ "$(yum repolist "${1:?}" | awk 'END {print $NF}')" > 0 ]]
 }
@@ -70,9 +70,6 @@ function amazon-linux-extra-safe () {
             # Amazon Linux 2 AMI needs this
             echo "installing repo: $repo ..."
             amazon-linux-extras install -y "$repo"
-        else
-            echo "$repo: not found the repo, abort." >&2
-            exit 255
         fi
     else
         echo 'amazon-linux-extra: not found the command, continue' >&2
@@ -125,7 +122,7 @@ function symbol-link-try () {
     local link_name=${!#}  # get the last argument
     if [[ ! -f $link_name ]]; then
         local target
-        for target in "${@1:$#-1}"; do  # remove the last argument
+        for target in "${@:1:$#-1}"; do  # remove the last argument
             if [[ -f $target ]]; then
                 echo "linking $target to $link_name ..."
                 ln -s "$target" "$link_name"
