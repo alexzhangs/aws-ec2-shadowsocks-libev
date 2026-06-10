@@ -24,7 +24,7 @@ Usage: install.sh [-m ENCRYPTION_METHOD] [-t TIMEOUT] [-f true|false] [-s SERVER
 OPTIONS
 	[-m ENCRYPTION_METHOD]
 
-	Encryption method, default is aes-256-cfb.
+	Encryption method, default is aes-256-gcm.
 
 	[-t TIMEOUT]
 
@@ -36,9 +36,11 @@ OPTIONS
 
 	[-s SERVER]
 
-	IP address that Shadowsocks manager will listen on, default is 127.0.0.1.
-	Use 0.0.0.0 instead of specific IP address to bind on public interface to eliminate
-	the dependency. But be aware that the manager API is not protected.
+	IP address that the Shadowsocks manager (multi-user API) listens on, default is 127.0.0.1.
+	The manager API is UNAUTHENTICATED, so anyone who can reach this port can create/remove
+	ports and users. Bind to 127.0.0.1 for a co-located manager, or to the instance's PRIVATE
+	IP for remote management, and restrict the port to the manager host with a security group.
+	Binding 0.0.0.0 / the public interface is UNSUPPORTED.
 
 	[-p PORT]
 
