@@ -7,15 +7,18 @@ function usage () {
     printf "Usage: ${0##*/} [-m ENCRYPTION_METHOD] [-t TIMEOUT] [-f true|false] [-s SERVER] [-p PORT]\n"
     printf "OPTIONS\n"
     printf "\t[-m ENCRYPTION_METHOD]\n\n"
-    printf "\tEncryption method, default is aes-256-cfb.\n\n"
+    printf "\tEncryption method, default is aes-256-gcm.\n\n"
     printf "\t[-t TIMEOUT]\n\n"
     printf "\tConnecting timeout after <N> seconds, default is 60.\n\n"
     printf "\t[-f true|false]\n\n"
     printf "\tFast Open, default is false.\n\n"
     printf "\t[-s SERVER]\n\n"
-    printf "\tIP address that Shadowsocks manager will listen on, default is 127.0.0.1.\n"
-    printf "\tUse 0.0.0.0 instead of specific IP address to bind on public interface to eliminate\n"
-    printf "\tthe dependency. But be aware that the manager API is not protected.\n\n"
+    printf "\tIP address that the Shadowsocks manager (multi-user API) listens on,\n"
+    printf "\tdefault is 127.0.0.1. The manager API is UNAUTHENTICATED, so anyone who\n"
+    printf "\tcan reach this port can create/remove ports and users. Bind to 127.0.0.1\n"
+    printf "\tfor a co-located manager, or to the instance's PRIVATE IP for remote\n"
+    printf "\tmanagement, and restrict the port to the manager host with a security\n"
+    printf "\tgroup. Binding 0.0.0.0 / the public interface is UNSUPPORTED.\n\n"
     printf "\t[-p PORT]\n\n"
     printf "\tPort that Shadowsocks manager will listen on, default is 6001.\n"
     printf "\tThis port is used by multi-user API, is not for the Socks services.\n"
@@ -48,7 +51,7 @@ done
 
 WORK_DIR=$(cd "$(dirname "$0")"; pwd)
 
-[[ -z $ENCRYPTION_METHOD ]] && ENCRYPTION_METHOD="aes-256-cfb"
+[[ -z $ENCRYPTION_METHOD ]] && ENCRYPTION_METHOD="aes-256-gcm"
 [[ -z $TIMEOUT ]] && TIMEOUT=60
 [[ -z $FAST_OPEN ]] && FAST_OPEN="false"
 [[ -z $SERVER ]] && SERVER="127.0.0.1"
